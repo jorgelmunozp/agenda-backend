@@ -6,24 +6,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AppModule = void 0;
+exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
-const serve_static_1 = require("@nestjs/serve-static");
-const path_1 = require("path");
-const auth_module_1 = require("./src/modules/auth/auth.module");
-const users_module_1 = require("./src/modules/users/users.module");
-let AppModule = class AppModule {
+const axios_1 = require("@nestjs/axios");
+const auth_controller_1 = require("./controller/auth.controller");
+const auth_service_1 = require("./service/auth.service");
+let AuthModule = class AuthModule {
 };
-exports.AppModule = AppModule;
-exports.AppModule = AppModule = __decorate([
+exports.AuthModule = AuthModule;
+exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            serve_static_1.ServeStaticModule.forRoot({
-                rootPath: (0, path_1.join)(__dirname, '..', 'public'),
-            }),
-            auth_module_1.AuthModule,
-            users_module_1.UsersModule,
-        ],
+        imports: [axios_1.HttpModule],
+        controllers: [auth_controller_1.AuthController],
+        providers: [auth_service_1.AuthService]
     })
-], AppModule);
-//# sourceMappingURL=app.module.js.map
+], AuthModule);
+//# sourceMappingURL=auth.module.js.map
