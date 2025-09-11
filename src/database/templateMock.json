@@ -1,0 +1,122 @@
+[
+    {
+      "user": {
+        "name": "juan",
+        "email": "juan@gmail.com",
+        "username": "juan",
+        "password": "juan123",
+        "tasks": [
+          {
+            "name": "tarea1",
+            "time": "02:00pm",
+            "date": "2025-06-20",
+            "message": "Hacer la tarea de matemáticas",
+            "completed": false
+          },
+          {
+            "name": "tarea2",
+            "time": "08:00am",
+            "date": "2025-06-21",
+            "message": "Llevar documentos al colegio",
+            "completed": true
+          }
+        ],
+        "reminders": [
+          {
+            "name": "recordatorio1",
+            "time": "02:00pm",
+            "date": "2025-06-20",
+            "message": "Hacer la tarea de matemáticas",
+            "completed": false
+          },
+          {
+            "name": "recordatorio2",
+            "time": "08:00am",
+            "date": "2025-06-21",
+            "message": "Llevar documentos al colegio",
+            "completed": true
+          }
+        ]
+      }
+    },
+    {
+      "user": {
+        "name": "luis",
+        "email": "luis@gmail.com",
+        "username": "luis",
+        "password": "luis123",
+        "tasks": [
+          {
+            "name": "tarea1",
+            "time": "04:00pm",
+            "date": "2025-07-20",
+            "message": "Hacer la tarea de español",
+            "completed": false
+          },
+          {
+            "name": "tarea2",
+            "time": "07:00am",
+            "date": "2025-07-21",
+            "message": "Llevar documentos a la universidad",
+            "completed": true
+          }
+        ],
+        "reminders": [
+          {
+            "name": "recordatorio1",
+            "time": "02:00pm",
+            "date": "2025-06-20",
+            "message": "Hacer la tarea de matemáticas",
+            "completed": false
+          },
+          {
+            "name": "recordatorio2",
+            "time": "08:00am",
+            "date": "2025-06-21",
+            "message": "Llevar documentos al colegio",
+            "completed": true
+          }
+        ]
+      }
+    },
+    {
+      "user": {
+        "name": "Ana",
+        "email": "anas@gmail.com",
+        "username": "ana",
+        "password": "ana123",
+        "tasks": [
+          {
+            "name": "tarea1",
+            "time": "12:00pm",
+            "date": "2025-08-20",
+            "message": "Hacer la tarea de sociales",
+            "completed": false
+          },
+          {
+            "name": "tarea2",
+            "time": "09:00am",
+            "date": "2025-08-21",
+            "message": "Hacer la matricula de la universidad",
+            "completed": true
+          }
+        ],
+        "reminders": [
+          {
+            "name": "recordatorio1",
+            "time": "02:00pm",
+            "date": "2025-06-20",
+            "message": "Hacer la tarea de matemáticas",
+            "completed": false
+          },
+          {
+            "name": "recordatorio2",
+            "time": "08:00am",
+            "date": "2025-06-21",
+            "message": "Llevar documentos al colegio",
+            "completed": true
+          }
+        ]
+      }
+    }
+  ]
