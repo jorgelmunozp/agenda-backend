@@ -1,7 +1,7 @@
 services:
   api:
     build: .
-    container_name: nest_api
+    container_name: organizeu
     restart: always
     ports:
       - "3000:3000"
