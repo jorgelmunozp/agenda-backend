@@ -2,7 +2,8 @@ import { Controller, Get, Post, Put, Patch, Delete, Param, Body, BadRequestExcep
 import { UsersService } from '../service/users.service';
 import * as dotenv from "dotenv";
 import { ObjectId } from 'mongodb';
-
+import { CreateTaskDto } from '../dto/create-task.dto';
+import { CreateReminderDto } from '../dto/create-reminder.dto';
 dotenv.config();                  // Load environment variables
 const db = 'users';               // Database route for this controller
 
@@ -76,7 +77,7 @@ export class UsersController {
 //************************** TASKS *************************************/
   // Service: Add a Task to a user
   @Post(':id/tasks')
-  async addTaskToUser(@Param('id') id: string, @Body() taskDto: any) {
+  async addTaskToUser(@Param('id') id: string, @Body() taskDto: CreateTaskDto) {
     this.ensureValidObjectId(id);
 
     if (!taskDto.name || !taskDto.time || !taskDto.date) {
@@ -133,7 +134,7 @@ export class UsersController {
 //************************** REMINDERS *************************************/
   // Service: Add a Reminder to a user
   @Post(':id/reminders')
-  async addReminderToUser(@Param('id') id: string, @Body() reminderDto: any) {
+  async addReminderToUser(@Param('id') id: string, @Body() reminderDto: CreateReminderDto) {
     this.ensureValidObjectId(id);
 
     if (!reminderDto.name || !reminderDto.time || !reminderDto.date) {
