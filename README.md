@@ -24,7 +24,7 @@ OrganizeU busca ayudar a los usuarios a organizar su vida diaria a través de un
 
 🔗 **Repositorio Backend:** [OrganizeU Backend](https://github.com/juanferm0410/organizeubackend.git)  
 🔗 **Mockup en Figma:** [Diseño en Figma](https://www.figma.com/proto/rRfQ1mqW5qB7c7kaUpHhJR/Mockup-OrganizeU?node-id=0-1&t=MW822j4HUdxDxn81-1)  
-🔗 **API en Render:** [OrganizeU API](https://organizeu.onrender.com)  
+🔗 **API en Render:** [OrganizeU API](https://organizeu.onrender.com/users/)  
 
 ---
 
