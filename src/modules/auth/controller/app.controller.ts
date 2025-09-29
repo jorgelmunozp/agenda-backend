@@ -5,17 +5,6 @@ import { AppService } from '../service/app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
-
-  @Get("greeting/:name")
-  greetingUser(@Param() params: any): string {
-    console.log(params)
-    return 'Hi Mr,  + ${params.name}';
-  }
-
   @Get("users")
   users(@Query() params: any): any {
     console.log(params)

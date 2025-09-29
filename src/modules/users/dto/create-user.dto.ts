@@ -1,5 +1,4 @@
 import { CreateTaskDto } from './create-task.dto';
-import { CreateReminderDto } from './create-reminder.dto';
 
 export class CreateUserDto {
   name: string;
@@ -7,5 +6,4 @@ export class CreateUserDto {
   username: string;
   password: string;
   tasks?: CreateTaskDto[];
-  reminders?: CreateReminderDto[];
 }
