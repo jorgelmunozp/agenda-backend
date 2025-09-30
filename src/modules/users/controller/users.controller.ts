@@ -4,6 +4,9 @@ import * as dotenv from "dotenv";
 import { ObjectId } from 'mongodb';
 import { CreateTaskDto } from '../dto/create-task.dto';
 
+import jwtEncode from "jwt-encode";
+const jwtSecretKey = process.env.JWT_SECRET ?? '';
+
 dotenv.config();                  // Load environment variables
 const db = 'users';               // Database route for this controller
 
@@ -35,8 +38,8 @@ export class UsersController {
     const userData = {
       name: body.name,
       email: body.email,
-      username: body.username,
-      password: body.password,
+      username: jwtEncode(body.username, jwtSecretKey),
+      password: jwtEncode(body.password, jwtSecretKey),
       tasks: Array.isArray(body.tasks) ? body.tasks : []
     };
 

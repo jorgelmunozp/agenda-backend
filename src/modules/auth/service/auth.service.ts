@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { LoginDto } from '../dto/login.dto';
+import { jwtDecode } from "jwt-decode";
 
 @Injectable()
 export class AuthService {
@@ -19,15 +20,20 @@ export class AuthService {
       }
 
       // Buscar el usuario por username
-      const found = users.find( (u: any) => u.user?.username === loginDto.username, );
-
+      const found = users.find((u: any) => {
+        const decodedUsername = jwtDecode<{ }>(u.user?.username); // Decodifica el username
+        return decodedUsername === loginDto.username;
+      });
       if (!found) {
         throw new UnauthorizedException('Incorrect username');
       }
 
       // Validar contraseña
-      if (found.user.password !== loginDto.password) {
-        throw new UnauthorizedException('Incorrect password');
+      if (found) {
+        const decodedPassword = jwtDecode<{ }>(found.user.password);
+        if (decodedPassword !== loginDto.password) {
+          throw new UnauthorizedException('Incorrect password');
+        }
       }
 
       // Retornamos el objeto user con id: _id

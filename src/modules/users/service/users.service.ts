@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import * as nodemailer from "nodemailer";
 import { CreateUserDto } from '../dto/create-user.dto';
 import { CreateTaskDto } from '../dto/create-task.dto';
+import { jwtDecode } from "jwt-decode";
 
 dotenv.config();                      // Load environment variables
 const dbCollection = 'user';          // MongoDB collection name
@@ -89,6 +90,8 @@ export class UsersService {
     // Retornamos específicamente cuál campo está repetido
     const result: { email?: boolean; username?: boolean } = {};
     if (existingData.user.email === email) result.email = true;
+    const decodedUsername = jwtDecode<{ }>(existingData.user.username);
+    if (decodedUsername === username ) result.username = true;
     if (existingData.user.username === username) result.username = true;
 
     return result;
@@ -105,8 +108,8 @@ export class UsersService {
     }
 
     const nombre = user.user?.name ?? 'User';
-    const username = user.user?.username ?? '(no username)';
-    const password = user.user?.password ?? '(no password)';
+    const username = jwtDecode(user.user?.username) ?? '(no username)';
+    const password = jwtDecode(user.user?.password) ?? '(no password)';
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
