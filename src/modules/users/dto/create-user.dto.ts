@@ -1,4 +1,4 @@
-import { CreateTaskDto } from './create-task.dto';
+import { CreateTaskDto } from '../../tasks/dto/create-task.dto';
 
 export class CreateUserDto {
   name: string;

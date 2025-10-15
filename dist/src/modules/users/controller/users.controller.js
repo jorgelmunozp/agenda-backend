@@ -53,7 +53,6 @@ const common_1 = require("@nestjs/common");
 const users_service_1 = require("../service/users.service");
 const dotenv = __importStar(require("dotenv"));
 const mongodb_1 = require("mongodb");
-const create_task_dto_1 = require("../dto/create-task.dto");
 const jwt_encode_1 = __importDefault(require("jwt-encode"));
 const jwtSecretKey = process.env.JWT_SECRET ?? '';
 dotenv.config();
@@ -97,30 +96,6 @@ let UsersController = class UsersController {
         console.log("User successfully registered:", userData);
         return this.usersService.create(userData);
     }
-    async addTaskToUser(id, taskDto) {
-        this.ensureValidObjectId(id);
-        if (!taskDto.name || !taskDto.time || !taskDto.date) {
-            throw new common_1.BadRequestException('The task must have a name, date and time');
-        }
-        const updatedUser = await this.usersService.addTask(id, taskDto);
-        if (!updatedUser) {
-            throw new common_1.NotFoundException(`No user with id found ${id}`);
-        }
-        console.log(`New task added to user ${id}:`, JSON.stringify(taskDto, null, 2));
-        return updatedUser;
-    }
-    async getTaskById(userId, taskId) {
-        this.ensureValidObjectId(userId);
-        const user = await this.usersService.getById(userId);
-        if (!user) {
-            throw new common_1.NotFoundException(`No user with id found ${userId}`);
-        }
-        const task = user.user.tasks.find((t) => t.id === taskId);
-        if (!task) {
-            throw new common_1.NotFoundException(`No task with id found ${taskId} for user ${userId}`);
-        }
-        return task;
-    }
     async recoverPassword(body) {
         if (!body.email)
             throw new common_1.BadRequestException('Email is mandatory');
@@ -153,22 +128,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "addUser", null);
-__decorate([
-    (0, common_1.Post)(':id/tasks'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, create_task_dto_1.CreateTaskDto]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "addTaskToUser", null);
-__decorate([
-    (0, common_1.Get)(':userId/tasks/:taskId'),
-    __param(0, (0, common_1.Param)('userId')),
-    __param(1, (0, common_1.Param)('taskId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "getTaskById", null);
 __decorate([
     (0, common_1.Post)('recover-password'),
     __param(0, (0, common_1.Body)()),

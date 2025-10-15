@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { CreateTaskDto } from '../dto/create-task.dto';
 export declare class UsersService {
     private readonly collectionName;
     private getCollection;
@@ -10,13 +9,6 @@ export declare class UsersService {
         user: CreateUserDto;
         message: string;
         _id: ObjectId;
-    }>;
-    addTask(userId: string, task: CreateTaskDto): Promise<{
-        message: string;
-        user?: undefined;
-    } | {
-        message: string;
-        user: import("mongodb").WithId<import("bson").Document>;
     }>;
     findByEmailOrUsername(email: string, username: string): Promise<{
         email?: boolean;

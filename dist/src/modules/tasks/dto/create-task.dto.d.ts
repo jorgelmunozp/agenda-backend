@@ -1,0 +1,6 @@
+export declare class CreateTaskDto {
+    name: string;
+    time: string;
+    date: string;
+    message: string;
+}

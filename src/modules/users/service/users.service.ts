@@ -4,7 +4,6 @@ import { ObjectId } from 'mongodb';
 import * as dotenv from "dotenv";
 import * as nodemailer from "nodemailer";
 import { CreateUserDto } from '../dto/create-user.dto';
-import { CreateTaskDto } from '../dto/create-task.dto';
 import { jwtDecode } from "jwt-decode";
 
 dotenv.config();                      // Load environment variables
@@ -40,37 +39,6 @@ export class UsersService {
     const newUser = { user: createUserDto };
     const result = await collection.insertOne(newUser);
     return { message: 'User created successfully', _id: result.insertedId, ...newUser };
-  }
-
-
-//************************** TASKS *************************************/
-  /*** SERVICE: ADD A TASK TO AN USER ************/
-  async addTask(userId: string, task: CreateTaskDto) {
-    const collection = await this.getCollection();
-    const objectId = new ObjectId(userId);
-
-    // Task Id
-    const userDoc = await collection.findOne({ _id: objectId });    // Obtener el usuario
-    if (!userDoc) { throw new NotFoundException(`User with id ${userId} not found`); }
-    const taskId = "t" + ((userDoc.user?.tasks?.length ?? 0) + 1);   // Calcular taskId como la longitud actual del arreglo + 1
-
-    const result = await collection.updateOne(
-      { _id: objectId },
-      { $push: { "user.tasks": { task: { ...task}, id: taskId } } } as any // se fuerza el tipo any porque TS valida paths anidados
-    );
-
-    if (result.matchedCount === 0) {
-      throw new NotFoundException(`User with id ${userId} not found`);
-    }
-
-    const updatedUser = await collection.findOne({ _id: objectId });
-
-    if (!updatedUser) {
-      console.warn(`Task was added, but user with id ${userId} could not be retrieved`);
-      return { message: "Task added successfully, but the user could not be returned", };
-    }
-
-    return { message: "Task added successfully", user: updatedUser, };    // Response to the API caller
   }
 
 

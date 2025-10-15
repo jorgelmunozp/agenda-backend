@@ -2,7 +2,6 @@ import { Controller, Get, Post, Put, Patch, Delete, Param, Body, BadRequestExcep
 import { UsersService } from '../service/users.service';
 import * as dotenv from "dotenv";
 import { ObjectId } from 'mongodb';
-import { CreateTaskDto } from '../dto/create-task.dto';
 
 import jwtEncode from "jwt-encode";
 const jwtSecretKey = process.env.JWT_SECRET ?? '';
@@ -55,47 +54,6 @@ export class UsersController {
   
     console.log("User successfully registered:", userData);
     return this.usersService.create(userData);
-  }
-
-//************************** TASKS *************************************/
-  // Service: Add a Task to a user
-  @Post(':id/tasks')
-  async addTaskToUser(@Param('id') id: string, @Body() taskDto: CreateTaskDto) {
-    this.ensureValidObjectId(id);
-
-    if (!taskDto.name || !taskDto.time || !taskDto.date) {
-      throw new BadRequestException('The task must have a name, date and time');
-    }
-
-    const updatedUser = await this.usersService.addTask(id, taskDto);
-
-    if (!updatedUser) {
-      throw new NotFoundException(`No user with id found ${id}`);
-    }
-
-    console.log(`New task added to user ${id}:`, JSON.stringify(taskDto, null, 2));
-
-    return updatedUser;
-  }
-
-  // Service: Get a Task from a user by id
-  @Get(':userId/tasks/:taskId')
-  async getTaskById( @Param('userId') userId: string, @Param('taskId') taskId: string ) {
-    this.ensureValidObjectId(userId);
-
-    // Obtener el usuario
-    const user = await this.usersService.getById(userId);
-    if (!user) {
-      throw new NotFoundException(`No user with id found ${userId}`);
-    }
-
-    // Buscar la tarea dentro del arreglo
-    const task = user.user.tasks.find((t: any) => t.id === taskId);
-    if (!task) {
-      throw new NotFoundException(`No task with id found ${taskId} for user ${userId}`);
-    }
-
-    return task;
   }
 
 //************************** PASSWORD RECOVERY *************************************/

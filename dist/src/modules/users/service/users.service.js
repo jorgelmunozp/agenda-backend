@@ -73,25 +73,6 @@ let UsersService = class UsersService {
         const result = await collection.insertOne(newUser);
         return { message: 'User created successfully', _id: result.insertedId, ...newUser };
     }
-    async addTask(userId, task) {
-        const collection = await this.getCollection();
-        const objectId = new mongodb_1.ObjectId(userId);
-        const userDoc = await collection.findOne({ _id: objectId });
-        if (!userDoc) {
-            throw new common_1.NotFoundException(`User with id ${userId} not found`);
-        }
-        const taskId = "t" + ((userDoc.user?.tasks?.length ?? 0) + 1);
-        const result = await collection.updateOne({ _id: objectId }, { $push: { "user.tasks": { task: { ...task }, id: taskId } } });
-        if (result.matchedCount === 0) {
-            throw new common_1.NotFoundException(`User with id ${userId} not found`);
-        }
-        const updatedUser = await collection.findOne({ _id: objectId });
-        if (!updatedUser) {
-            console.warn(`Task was added, but user with id ${userId} could not be retrieved`);
-            return { message: "Task added successfully, but the user could not be returned", };
-        }
-        return { message: "Task added successfully", user: updatedUser, };
-    }
     async findByEmailOrUsername(email, username) {
         const collection = await this.getCollection();
         const existingData = await collection.findOne({

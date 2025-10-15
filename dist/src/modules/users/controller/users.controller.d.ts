@@ -1,6 +1,5 @@
 import { UsersService } from '../service/users.service';
 import { ObjectId } from 'mongodb';
-import { CreateTaskDto } from '../dto/create-task.dto';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
@@ -11,14 +10,6 @@ export declare class UsersController {
         message: string;
         _id: ObjectId;
     }>;
-    addTaskToUser(id: string, taskDto: CreateTaskDto): Promise<{
-        message: string;
-        user?: undefined;
-    } | {
-        message: string;
-        user: import("mongodb").WithId<import("bson").Document>;
-    }>;
-    getTaskById(userId: string, taskId: string): Promise<any>;
     recoverPassword(body: {
         email: string;
     }): Promise<{
