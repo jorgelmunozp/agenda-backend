@@ -1,70 +1,47 @@
-import { Controller, Get, Post, Put, Patch, Delete, Param, Body, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../service/users.service';
 import * as dotenv from "dotenv";
 import { ObjectId } from 'mongodb';
+import { UseGuards } from '@nestjs/common';
+import { AuthService } from '../../auth/service/auth.service';
+import { JwtAuthGuard } from '../../auth/jwt/jwt-auth.guard';
+import { CreateUserDto } from '../dto/create-user.dto';
 
-import jwtEncode from "jwt-encode";
-const jwtSecretKey = process.env.JWT_SECRET ?? '';
 
 dotenv.config();                  // Load environment variables
 const db = 'users';               // Database route for this controller
 
 @Controller(db)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
 //************************** USERS *************************************/
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getAllUsers() {
     return this.usersService.getAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async getById(@Param('id') id: string) {
     this.ensureValidObjectId(id);
     return this.usersService.getById(id);
   }
 
+  // Registrar un nuevo usuario
   @Post()
-  async addUser(@Body() body: any) {
-    // Validaciones mínimas
-    if (!body.name) throw new BadRequestException('Name is required');
-    if (!body.email) throw new BadRequestException('Email is required');
-    if (!body.username) throw new BadRequestException('Username is required');
-    if (!body.password) throw new BadRequestException('Password is required');
-
-    // Construcción explícita del objeto user
-    const userData = {
-      name: body.name,
-      email: body.email,
-      username: jwtEncode(body.username, jwtSecretKey),
-      password: jwtEncode(body.password, jwtSecretKey),
-      tasks: Array.isArray(body.tasks) ? body.tasks : []
-    };
-
-    // Valida si ya existe un usuario con el mismo email o username
-    const existingData = await this.usersService.findByEmailOrUsername(body.email, body.username);
-
-    if (existingData) {
-      let message = 'The following fields already exist: ';
-      if (existingData.email) message += 'email ';
-      if (existingData.username) message += 'username';
-      throw new BadRequestException(message.trim());
-    }
-  
-    console.log("User successfully registered:", userData);
-    return this.usersService.create(userData);
+  async addUser(@Body() body: CreateUserDto) {
+    const user = (await this.usersService.create(body)).user;
+    const token = await this.authService.generateToken(user);
+    return token;
   }
 
-//************************** PASSWORD RECOVERY *************************************/
-  // Service: Send password recovery email
-  @Post('recover-password')
-  async recoverPassword(@Body() body: { email: string }) {
-    if (!body.email) throw new BadRequestException('Email is mandatory');
-    return this.usersService.sendPasswordRecoveryEmail(body.email);
-  }
 
-  // Helper privado para validar ObjectId
+  // Helper privado para validar ObjectId de MongoDB
   private ensureValidObjectId(id: string) {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException(`The provided id is not a valid ObjectId: ${id}`);

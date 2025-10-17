@@ -1,19 +1,14 @@
 import { UsersService } from '../service/users.service';
-import { ObjectId } from 'mongodb';
+import { AuthService } from '../../auth/service/auth.service';
+import { CreateUserDto } from '../dto/create-user.dto';
 export declare class UsersController {
     private readonly usersService;
-    constructor(usersService: UsersService);
+    private readonly authService;
+    constructor(usersService: UsersService, authService: AuthService);
     getAllUsers(): Promise<import("mongodb").WithId<import("bson").Document>[]>;
     getById(id: string): Promise<import("mongodb").WithId<import("bson").Document>>;
-    addUser(body: any): Promise<{
-        user: import("../dto/create-user.dto").CreateUserDto;
-        message: string;
-        _id: ObjectId;
-    }>;
-    recoverPassword(body: {
-        email: string;
-    }): Promise<{
-        message: string;
+    addUser(body: CreateUserDto): Promise<{
+        access_token: string;
     }>;
     private ensureValidObjectId;
 }

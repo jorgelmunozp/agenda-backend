@@ -44,8 +44,7 @@ const common_1 = require("@nestjs/common");
 const connectDB_1 = require("../../../database/connectDB");
 const mongodb_1 = require("mongodb");
 const dotenv = __importStar(require("dotenv"));
-const nodemailer = __importStar(require("nodemailer"));
-const jwt_decode_1 = require("jwt-decode");
+const bcrypt = __importStar(require("bcryptjs"));
 dotenv.config();
 const dbCollection = 'user';
 let UsersService = class UsersService {
@@ -69,9 +68,27 @@ let UsersService = class UsersService {
     }
     async create(createUserDto) {
         const collection = await this.getCollection();
-        const newUser = { user: createUserDto };
-        const result = await collection.insertOne(newUser);
-        return { message: 'User created successfully', _id: result.insertedId, ...newUser };
+        const existingData = await this.findByEmailOrUsername(createUserDto.email, createUserDto.username);
+        if (existingData) {
+            let message = 'The following fields already exist: ';
+            if (existingData.email)
+                message += 'email ';
+            if (existingData.username)
+                message += 'username';
+            throw new common_1.BadRequestException(message.trim());
+        }
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const userData = {
+            user: {
+                name: createUserDto.name,
+                email: createUserDto.email,
+                username: createUserDto.username,
+                password: hashedPassword,
+                tasks: Array.isArray(createUserDto.tasks) ? createUserDto.tasks : [],
+            }
+        };
+        const result = await collection.insertOne(userData);
+        return { message: 'User created successfully', user: { _id: result.insertedId, ...userData } };
     }
     async findByEmailOrUsername(email, username) {
         const collection = await this.getCollection();
@@ -83,47 +100,10 @@ let UsersService = class UsersService {
         const result = {};
         if (existingData.user.email === email)
             result.email = true;
-        const decodedUsername = (0, jwt_decode_1.jwtDecode)(existingData.user.username);
+        const decodedUsername = existingData.user.username;
         if (decodedUsername === username)
             result.username = true;
-        if (existingData.user.username === username)
-            result.username = true;
         return result;
-    }
-    async sendPasswordRecoveryEmail(email) {
-        const collection = await this.getCollection();
-        const user = await collection.findOne({ "user.email": email });
-        if (!user) {
-            throw new common_1.NotFoundException(`There is no user with the email ${email}`);
-        }
-        const nombre = user.user?.name ?? 'User';
-        const username = (0, jwt_decode_1.jwtDecode)(user.user?.username) ?? '(no username)';
-        const password = (0, jwt_decode_1.jwtDecode)(user.user?.password) ?? '(no password)';
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT ?? "587"),
-            secure: false,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
-            },
-        });
-        const info = await transporter.sendMail({
-            from: `"Soporte Agenda" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: "Recuperación de contraseña",
-            html: `
-        <h2>Hola ${nombre},</h2>
-        <p>Hemos recibido una solicitud de recuperación de contraseña para tu cuenta.</p>
-        <p><strong>Usuario:</strong> ${username}</p>
-        <p><strong>Contraseña actual:</strong> ${password}</p>
-        <br />
-        <p>Si no solicitaste esta información, puedes ignorar este mensaje.</p>
-        <p style="color: gray; font-size: 12px;">Este es un correo generado automáticamente, no respondas a este mensaje.</p>
-      `,
-        });
-        console.log(`Email with password sent to ${email}:`, info.messageId);
-        return { message: "Recovery email sent with current password" };
     }
 };
 exports.UsersService = UsersService;

@@ -6,6 +6,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - MONGO_URL=mongodb+srv://${dbUser}:${dbPassword}@${dbDomain}/?retryWrites=true&w=majority&appName=${dbCluster}
+      - MONGO_URL=mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_DOMAIN}/?retryWrites=true&w=majority&appName=${DB_CLUSTER}
     env_file:
       - .env  

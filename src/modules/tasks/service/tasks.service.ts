@@ -29,7 +29,7 @@ export class TasksService {
 
     const result = await collection.updateOne(
       { _id: objectId },
-      { $push: { "user.tasks": { task: { ...task, completed: false }, id: taskId } } } as any // se fuerza el tipo any porque TS valida paths anidados
+      { $push: { "user.tasks": { task: { ...task}, id: taskId } } } as any // se fuerza el tipo any porque TS valida paths anidados
     );
 
     if (result.matchedCount === 0) {
@@ -45,22 +45,4 @@ export class TasksService {
 
     return { message: "Task added successfully", user: updatedUser, };    // Response to the API caller
   }
-
-  /*** SERVICE: CHECK A COMPLETED TASK ************/
-  async completeTask(userId: string, taskId: string) {
-    const collection = await this.getCollection();
-
-    const result = await collection.findOneAndUpdate(
-      {
-        _id: new ObjectId(userId),
-        "user.tasks.id": taskId // busco la tarea específica
-      },
-      {
-        $set: { "user.tasks.$.task.completed": true } // actualizo el estado a completed
-      }
-    );
-    
-    return "Task marked as completed successfully";
-  }
-
 }

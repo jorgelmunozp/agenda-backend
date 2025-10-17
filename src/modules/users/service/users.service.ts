@@ -1,10 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { connectDB } from '../../../database/connectDB';
 import { ObjectId } from 'mongodb';
 import * as dotenv from "dotenv";
-import * as nodemailer from "nodemailer";
 import { CreateUserDto } from '../dto/create-user.dto';
-import { jwtDecode } from "jwt-decode";
+import * as bcrypt from 'bcryptjs';
 
 dotenv.config();                      // Load environment variables
 const dbCollection = 'user';          // MongoDB collection name
@@ -13,7 +12,7 @@ const dbCollection = 'user';          // MongoDB collection name
 export class UsersService {
   private readonly collectionName = dbCollection;
 
-  private async getCollection() {
+  public async getCollection() {
     const db = await connectDB();     // Database connection
     return db.collection(this.collectionName);  // Return the specific collection
   }
@@ -36,12 +35,36 @@ export class UsersService {
   /*** SERVICE: CREATE NEW USER ************/
   async create(createUserDto: CreateUserDto) {
     const collection = await this.getCollection();
-    const newUser = { user: createUserDto };
-    const result = await collection.insertOne(newUser);
-    return { message: 'User created successfully', _id: result.insertedId, ...newUser };
+
+    // Verificar duplicados
+    const existingData = await this.findByEmailOrUsername(createUserDto.email, createUserDto.username);
+    
+    if (existingData) {
+      let message = 'The following fields already exist: ';
+      if (existingData.email) message += 'email ';
+      if (existingData.username) message += 'username';
+      throw new BadRequestException(message.trim());
+    }
+
+    // Hashear contraseña
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    // Preparar datos
+    const userData = {
+      user: {
+        name: createUserDto.name,
+        email: createUserDto.email,
+        username: createUserDto.username,
+        password: hashedPassword,
+        tasks: Array.isArray(createUserDto.tasks) ? createUserDto.tasks : [],
+      }
+    };
+
+    // Insertar en la base de datos
+    const result = await collection.insertOne(userData);
+    return { message: 'User created successfully', user: {  _id: result.insertedId, ...userData } };
   }
-
-
+  
 //************************** REGISTER *************************************/
   /*** SERVICE: CHECK IF USERNAME OR EMAIL USER ALREADY EXISTS ************/
   async findByEmailOrUsername(email: string, username: string) {
@@ -58,55 +81,11 @@ export class UsersService {
     // Retornamos específicamente cuál campo está repetido
     const result: { email?: boolean; username?: boolean } = {};
     if (existingData.user.email === email) result.email = true;
-    const decodedUsername = jwtDecode<{ }>(existingData.user.username);
+    const decodedUsername = existingData.user.username;
     if (decodedUsername === username ) result.username = true;
-    if (existingData.user.username === username) result.username = true;
 
     return result;
   }
 
-//************************** PASSWORD RECOVERY *************************************/
-  /*** SERVICE: SEND PASSWORD RECOVERY EMAIL ************/
-  async sendPasswordRecoveryEmail(email: string) {
-    const collection = await this.getCollection();
-    const user = await collection.findOne({ "user.email": email });
-
-    if (!user) {
-      throw new NotFoundException(`There is no user with the email ${email}`);
-    }
-
-    const nombre = user.user?.name ?? 'User';
-    const username = jwtDecode(user.user?.username) ?? '(no username)';
-    const password = jwtDecode(user.user?.password) ?? '(no password)';
-
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT ?? "587"),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: `"Soporte Agenda" <${process.env.SMTP_USER}>`,
-      to: email,
-      subject: "Recuperación de contraseña",
-      html: `
-        <h2>Hola ${nombre},</h2>
-        <p>Hemos recibido una solicitud de recuperación de contraseña para tu cuenta.</p>
-        <p><strong>Usuario:</strong> ${username}</p>
-        <p><strong>Contraseña actual:</strong> ${password}</p>
-        <br />
-        <p>Si no solicitaste esta información, puedes ignorar este mensaje.</p>
-        <p style="color: gray; font-size: 12px;">Este es un correo generado automáticamente, no respondas a este mensaje.</p>
-      `,
-    });
-
-    console.log(`Email with password sent to ${email}:`, info.messageId);  // Message on the server console
-
-    return { message: "Recovery email sent with current password" };  // Response to the API caller
-  }
-
+  
 }

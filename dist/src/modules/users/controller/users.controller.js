@@ -44,22 +44,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("../service/users.service");
 const dotenv = __importStar(require("dotenv"));
 const mongodb_1 = require("mongodb");
-const jwt_encode_1 = __importDefault(require("jwt-encode"));
-const jwtSecretKey = process.env.JWT_SECRET ?? '';
+const common_2 = require("@nestjs/common");
+const auth_service_1 = require("../../auth/service/auth.service");
+const jwt_auth_guard_1 = require("../../auth/jwt/jwt-auth.guard");
+const create_user_dto_1 = require("../dto/create-user.dto");
 dotenv.config();
 const db = 'users';
 let UsersController = class UsersController {
-    constructor(usersService) {
+    constructor(usersService, authService) {
         this.usersService = usersService;
+        this.authService = authService;
     }
     async getAllUsers() {
         return this.usersService.getAll();
@@ -69,37 +69,9 @@ let UsersController = class UsersController {
         return this.usersService.getById(id);
     }
     async addUser(body) {
-        if (!body.name)
-            throw new common_1.BadRequestException('Name is required');
-        if (!body.email)
-            throw new common_1.BadRequestException('Email is required');
-        if (!body.username)
-            throw new common_1.BadRequestException('Username is required');
-        if (!body.password)
-            throw new common_1.BadRequestException('Password is required');
-        const userData = {
-            name: body.name,
-            email: body.email,
-            username: (0, jwt_encode_1.default)(body.username, jwtSecretKey),
-            password: (0, jwt_encode_1.default)(body.password, jwtSecretKey),
-            tasks: Array.isArray(body.tasks) ? body.tasks : []
-        };
-        const existingData = await this.usersService.findByEmailOrUsername(body.email, body.username);
-        if (existingData) {
-            let message = 'The following fields already exist: ';
-            if (existingData.email)
-                message += 'email ';
-            if (existingData.username)
-                message += 'username';
-            throw new common_1.BadRequestException(message.trim());
-        }
-        console.log("User successfully registered:", userData);
-        return this.usersService.create(userData);
-    }
-    async recoverPassword(body) {
-        if (!body.email)
-            throw new common_1.BadRequestException('Email is mandatory');
-        return this.usersService.sendPasswordRecoveryEmail(body.email);
+        const user = (await this.usersService.create(body)).user;
+        const token = await this.authService.generateToken(user);
+        return token;
     }
     ensureValidObjectId(id) {
         if (!mongodb_1.ObjectId.isValid(id)) {
@@ -109,12 +81,14 @@ let UsersController = class UsersController {
 };
 exports.UsersController = UsersController;
 __decorate([
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getAllUsers", null);
 __decorate([
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -125,18 +99,12 @@ __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "addUser", null);
-__decorate([
-    (0, common_1.Post)('recover-password'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "recoverPassword", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)(db),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        auth_service_1.AuthService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

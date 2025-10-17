@@ -62,7 +62,7 @@ let TasksService = class TasksService {
             throw new common_1.NotFoundException(`User with id ${userId} not found`);
         }
         const taskId = "t" + ((userDoc.user?.tasks?.length ?? 0) + 1);
-        const result = await collection.updateOne({ _id: objectId }, { $push: { "user.tasks": { task: { ...task, completed: false }, id: taskId } } });
+        const result = await collection.updateOne({ _id: objectId }, { $push: { "user.tasks": { task: { ...task }, id: taskId } } });
         if (result.matchedCount === 0) {
             throw new common_1.NotFoundException(`User with id ${userId} not found`);
         }
@@ -72,16 +72,6 @@ let TasksService = class TasksService {
             return { message: "Task added successfully, but the user could not be returned", };
         }
         return { message: "Task added successfully", user: updatedUser, };
-    }
-    async completeTask(userId, taskId) {
-        const collection = await this.getCollection();
-        const result = await collection.findOneAndUpdate({
-            _id: new mongodb_1.ObjectId(userId),
-            "user.tasks.id": taskId
-        }, {
-            $set: { "user.tasks.$.task.completed": true }
-        });
-        return "Task marked as completed successfully";
     }
 };
 exports.TasksService = TasksService;

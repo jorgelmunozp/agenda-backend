@@ -9,5 +9,4 @@ export declare class TasksService {
         message: string;
         user: import("mongodb").WithId<import("bson").Document>;
     }>;
-    completeTask(userId: string, taskId: string): Promise<string>;
 }
