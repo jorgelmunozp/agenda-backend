@@ -73,6 +73,41 @@ let TasksService = class TasksService {
         }
         return { message: "Task added successfully", user: updatedUser, };
     }
+    async completeTask(userId, taskId) {
+        const collection = await this.getCollection();
+        const result = await collection.findOneAndUpdate({
+            _id: new mongodb_1.ObjectId(userId),
+            "user.tasks.id": taskId
+        }, {
+            $set: { "user.tasks.$.task.completed": true }
+        });
+        return "Task marked as completed successfully";
+    }
+    async getTasks(userId, page = 1, limit = 10, name) {
+        const collection = await this.getCollection();
+        const objectId = new mongodb_1.ObjectId(userId);
+        const userDoc = await collection.findOne({ _id: objectId });
+        if (!userDoc) {
+            throw new common_1.NotFoundException(`User with id ${userId} not found`);
+        }
+        let tasks = userDoc.user?.tasks ?? [];
+        if (name) {
+            tasks = tasks.filter((t) => t.task.name.toLowerCase().includes(name.toLowerCase()));
+        }
+        const total = tasks.length;
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        const paginatedTasks = tasks.slice(start, end);
+        return {
+            data: paginatedTasks,
+            meta: {
+                total,
+                page,
+                limit,
+                last_page: Math.ceil(total / limit),
+            },
+        };
+    }
 };
 exports.TasksService = TasksService;
 exports.TasksService = TasksService = __decorate([

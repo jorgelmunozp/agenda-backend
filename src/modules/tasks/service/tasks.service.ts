@@ -29,7 +29,7 @@ export class TasksService {
 
     const result = await collection.updateOne(
       { _id: objectId },
-      { $push: { "user.tasks": { task: { ...task, completed: false }, id: taskId } } } as any // se fuerza el tipo any porque TS valida paths anidados
+      { $push: { "user.tasks": { task: { ...task }, id: taskId } } } as any // se fuerza el tipo any porque TS valida paths anidados
     );
 
     if (result.matchedCount === 0) {

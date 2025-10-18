@@ -9,4 +9,14 @@ export declare class TasksService {
         message: string;
         user: import("mongodb").WithId<import("bson").Document>;
     }>;
+    completeTask(userId: string, taskId: string): Promise<string>;
+    getTasks(userId: string, page?: number, limit?: number, name?: string): Promise<{
+        data: any;
+        meta: {
+            total: any;
+            page: number;
+            limit: number;
+            last_page: number;
+        };
+    }>;
 }

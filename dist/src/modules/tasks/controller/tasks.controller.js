@@ -73,17 +73,15 @@ let TasksController = class TasksController {
         console.log(`New task added to user ${id}:`, JSON.stringify(taskDto, null, 2));
         return updatedUser;
     }
-    async getAllTasks(userId) {
+    async getAllTasks(userId, page, limit, name) {
         this.ensureValidObjectId(userId);
-        const user = await this.usersService.getById(userId);
-        if (!user) {
-            throw new common_1.NotFoundException(`No user with id found ${userId}`);
+        const pageNum = page ? parseInt(page, 10) : 1;
+        const limitNum = limit ? parseInt(limit, 10) : 10;
+        const result = await this.tasksService.getTasks(userId, pageNum, limitNum, name);
+        if (!result.data || result.data.length === 0) {
+            throw new common_1.NotFoundException(`No tasks found for user ${userId} with the given filter`);
         }
-        const tasks = user.user.tasks;
-        if (!tasks || tasks.length === 0) {
-            throw new common_1.NotFoundException(`No tasks found for user ${userId}`);
-        }
-        return tasks;
+        return result;
     }
     async getTaskById(userId, taskId) {
         this.ensureValidObjectId(userId);
@@ -96,6 +94,15 @@ let TasksController = class TasksController {
             throw new common_1.NotFoundException(`No task with id found ${taskId} for user ${userId}`);
         }
         return task;
+    }
+    async completeTask(userId, taskId) {
+        this.ensureValidObjectId(userId);
+        const updatedTask = await this.tasksService.completeTask(userId, taskId);
+        if (!updatedTask) {
+            throw new common_1.NotFoundException(`No task with id ${taskId} found for user ${userId}`);
+        }
+        console.log(`Task ${taskId} for user ${userId} marked as completado:`, updatedTask);
+        return updatedTask;
     }
     ensureValidObjectId(id) {
         if (!mongodb_1.ObjectId.isValid(id)) {
@@ -117,8 +124,11 @@ __decorate([
     (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)(':userId/tasks'),
     __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __param(3, (0, common_1.Query)('name')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], TasksController.prototype, "getAllTasks", null);
 __decorate([
@@ -130,6 +140,15 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], TasksController.prototype, "getTaskById", null);
+__decorate([
+    (0, common_2.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Patch)(':userId/tasks/:taskId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Param)('taskId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], TasksController.prototype, "completeTask", null);
 exports.TasksController = TasksController = __decorate([
     (0, common_1.Controller)(db),
     __metadata("design:paramtypes", [tasks_service_1.TasksService, users_service_1.UsersService])
