@@ -20,7 +20,9 @@ async function bootstrap() {
     const frontendMobilePort = process.env.FRONTEND_MOBILE_PORT;
     const frontendUrlWeb = process.env.FRONTEND_URL_WEB || `http://${host}:${frontendWebPort}`;
     const frontendUrlMobile = process.env.FRONTEND_URL_MOBILE || `http://${host}:${frontendMobilePort}`;
-    const allowedOrigins = [frontendUrlWeb, frontendUrlMobile].filter((o) => !!o);
+    const localhostWeb = `http://localhost:${frontendWebPort}`;
+    const localhostMobile = `http://localhost:${frontendMobilePort}`;
+    const allowedOrigins = [frontendUrlWeb, frontendUrlMobile, localhostWeb, localhostMobile].filter((o) => !!o);
     app.enableCors({
         origin: allowedOrigins,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
