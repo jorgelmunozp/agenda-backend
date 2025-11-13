@@ -44,12 +44,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PasswordService = void 0;
 const common_1 = require("@nestjs/common");
-const connectDB_1 = require("../../../database/connectDB");
-const mongodb_1 = require("mongodb");
-const dotenv = __importStar(require("dotenv"));
-const nodemailer = __importStar(require("nodemailer"));
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = __importStar(require("bcryptjs"));
+const dotenv = __importStar(require("dotenv"));
+const mongodb_1 = require("mongodb");
+const nodemailer = __importStar(require("nodemailer"));
+const connectDB_1 = require("../../../database/connectDB");
 dotenv.config();
 const dbCollection = 'user';
 let PasswordService = class PasswordService {
@@ -61,16 +61,17 @@ let PasswordService = class PasswordService {
         const db = await (0, connectDB_1.connectDB)();
         return db.collection(this.collectionName);
     }
-    async sendPasswordRecoveryEmail(email) {
+    async sendPasswordRecoveryEmail(email, origin = 'web') {
         const collection = await this.getCollection();
-        const user = await collection.findOne({ "user.email": email });
+        const user = await collection.findOne({ 'user.email': email });
         if (!user)
             throw new common_1.NotFoundException(`There is no user with the email ${email}`);
         const token = this.jwtService.sign({ _id: user._id }, { secret: process.env.JWT_SECRET, expiresIn: 900 });
-        const resetLink = `${process.env.FRONTEND_URL}/password-reset/${token}`;
+        const baseUrl = origin === 'mobile' ? process.env.FRONTEND_URL_MOBILE : process.env.FRONTEND_URL_WEB;
+        const resetLink = `${baseUrl}/password-reset/${token}`;
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT ?? "587"),
+            port: parseInt(process.env.SMTP_PORT ?? '587'),
             secure: false,
             auth: {
                 user: process.env.SMTP_USER,
@@ -80,7 +81,7 @@ let PasswordService = class PasswordService {
         const info = await transporter.sendMail({
             from: `"Soporte OrganizeU" <${process.env.SMTP_USER}>`,
             to: email,
-            subject: "Recuperación de contraseña",
+            subject: 'Recuperación de contraseña',
             html: `
         <h2>Hola ${user.user?.name ?? 'Usuario'},</h2>
         <p>Has solicitado restablecer tu contraseña.</p>

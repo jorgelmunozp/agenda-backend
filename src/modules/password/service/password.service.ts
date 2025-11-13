@@ -1,14 +1,13 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { connectDB } from '../../../database/connectDB';
-import { ObjectId } from 'mongodb';
-import * as dotenv from "dotenv";
-import * as nodemailer from "nodemailer";
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { PasswordRecoverDto } from '../dto/password-recover.login.dto';
+import * as dotenv from 'dotenv';
+import { ObjectId } from 'mongodb';
+import * as nodemailer from 'nodemailer';
+import { connectDB } from '../../../database/connectDB';
 
-dotenv.config();                      // Load environment variables
-const dbCollection = 'user';          // MongoDB collection name
+dotenv.config(); // Load environment variables
+const dbCollection = 'user'; // MongoDB collection name
 
 @Injectable()
 export class PasswordService {
@@ -17,31 +16,30 @@ export class PasswordService {
   private readonly collectionName = dbCollection;
 
   private async getCollection() {
-    const db = await connectDB();     // Database connection
-    return db.collection(this.collectionName);  // Return the specific collection
+    const db = await connectDB(); // Database connection
+    return db.collection(this.collectionName); // Return the specific collection
   }
 
-//************************** PASSWORD *************************************/
+  //************************** PASSWORD *************************************/
   /*** SERVICE: SEND PASSWORD RECOVERY EMAIL ************/
-  async sendPasswordRecoveryEmail(email: string) {
+  async sendPasswordRecoveryEmail(email: string, origin: 'web' | 'mobile' = 'web') {
     const collection = await this.getCollection();
-    const user = await collection.findOne({ "user.email": email });
+    const user = await collection.findOne({ 'user.email': email });
     if (!user) throw new NotFoundException(`There is no user with the email ${email}`);
 
     // A temporary token is generated (15 minutes validity)
-    const token = this.jwtService.sign(
-      { _id: user._id },
-      { secret: process.env.JWT_SECRET, expiresIn: 900 }
-    );
+    const token = this.jwtService.sign({ _id: user._id }, { secret: process.env.JWT_SECRET, expiresIn: 900 });
+
+    // Elegir baseUrl según origen
+    const baseUrl = origin === 'mobile' ? process.env.FRONTEND_URL_MOBILE : process.env.FRONTEND_URL_WEB;
 
     // Link de recuperación
-    // const resetLink = `${process.env.BACKEND_URL}/password/reset/${token}`;
-    const resetLink = `${process.env.FRONTEND_URL}/password-reset/${token}`;
+    const resetLink = `${baseUrl}/password-reset/${token}`;
 
     // Se configura transporte de correo
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT ?? "587"),
+      port: parseInt(process.env.SMTP_PORT ?? '587'),
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
@@ -53,7 +51,7 @@ export class PasswordService {
     const info = await transporter.sendMail({
       from: `"Soporte OrganizeU" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: "Recuperación de contraseña",
+      subject: 'Recuperación de contraseña',
       html: `
         <h2>Hola ${user.user?.name ?? 'Usuario'},</h2>
         <p>Has solicitado restablecer tu contraseña.</p>
@@ -81,7 +79,6 @@ export class PasswordService {
     }
   }
 
-
   /*** SERVICE: VERIFY TOKEN ************/
   async updatePasswordById(id: string, newPassword: string) {
     const collection = await this.getCollection();
@@ -92,13 +89,8 @@ export class PasswordService {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Actualizar en Mongo
-    await collection.updateOne(
-      { _id: user._id },
-      { $set: { 'user.password': hashedPassword } }
-    );
+    await collection.updateOne({ _id: user._id }, { $set: { 'user.password': hashedPassword } });
 
     return { message: 'Password updated succesfully' };
   }
-
-  
 }
