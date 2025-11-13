@@ -18,8 +18,8 @@ async function bootstrap() {
     const port = Number(process.env.PORT);
     const frontendWebPort = process.env.FRONTEND_WEB_PORT;
     const frontendMobilePort = process.env.FRONTEND_MOBILE_PORT;
-    const frontendUrlWeb = process.env.FRONTEND_URL_WEB || `http://${host}:${frontendWebPort}`;
-    const frontendUrlMobile = process.env.FRONTEND_URL_MOBILE || `http://${host}:${frontendMobilePort}`;
+    const frontendUrlWeb = process.env.FRONTEND_URL_PROD_WEB || `http://${host}:${frontendWebPort}`;
+    const frontendUrlMobile = process.env.FRONTEND_URL_PROD_MOBILE || `http://${host}:${frontendMobilePort}`;
     const localhostWeb = `http://localhost:${frontendWebPort}`;
     const localhostMobile = `http://localhost:${frontendMobilePort}`;
     const allowedOrigins = [frontendUrlWeb, frontendUrlMobile, localhostWeb, localhostMobile].filter((o) => !!o);
@@ -29,8 +29,8 @@ async function bootstrap() {
         credentials: true,
     });
     await app.listen(port, '0.0.0.0');
-    const backendUrl = process.env.BACKEND_URL || `http://${host}:${port}`;
-    console.log(`🚀 Server running on ${backendUrl}`);
+    const urlBackend = process.env.BACKEND_URL_PROD || `http://${host}:${port}`;
+    console.log(`🚀 Server running on ${urlBackend}`);
     console.log('🌐 CORS allowed from:', allowedOrigins);
 }
 bootstrap();

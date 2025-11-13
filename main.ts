@@ -29,11 +29,11 @@ async function bootstrap() {
   const frontendWebPort = process.env.FRONTEND_WEB_PORT;
   const frontendMobilePort = process.env.FRONTEND_MOBILE_PORT;
 
-  // URLs basadas en la IP/host del .env
-  const frontendUrlWeb = process.env.FRONTEND_URL_WEB || `http://${host}:${frontendWebPort}`;
-  const frontendUrlMobile = process.env.FRONTEND_URL_MOBILE || `http://${host}:${frontendMobilePort}`;
+  // URLs basadas en la IP/host del .env, revisando si es PROD o DEV
+  const frontendUrlWeb = process.env.FRONTEND_URL_PROD_WEB || `http://${host}:${frontendWebPort}`;
+  const frontendUrlMobile = process.env.FRONTEND_URL_PROD_MOBILE || `http://${host}:${frontendMobilePort}`;
 
-  // Variantes en localhost (para DEV en el mismo PC)
+  // URLs en localhost (para DEV en el mismo PC)
   const localhostWeb = `http://localhost:${frontendWebPort}`;
   const localhostMobile = `http://localhost:${frontendMobilePort}`;
 
@@ -47,9 +47,9 @@ async function bootstrap() {
   });
 
   await app.listen(port, '0.0.0.0'); // 0.0.0.0 para aceptar otras máquinas de la red
-  const backendUrl = process.env.BACKEND_URL || `http://${host}:${port}`;
+  const urlBackend = process.env.BACKEND_URL_PROD || `http://${host}:${port}`;
 
-  console.log(`🚀 Server running on ${backendUrl}`);
+  console.log(`🚀 Server running on ${urlBackend}`);
   console.log('🌐 CORS allowed from:', allowedOrigins);
 }
 bootstrap();
