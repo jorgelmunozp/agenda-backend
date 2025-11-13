@@ -14,14 +14,22 @@ async function bootstrap() {
         forbidNonWhitelisted: true,
         transform: true,
     }));
-    const allowedOrigins = ['*', process.env.FRONTEND_URL_WEB, process.env.FRONTEND_URL_MOBILE].filter((o) => !!o);
+    const host = process.env.HOST;
+    const port = Number(process.env.PORT);
+    const frontendWebPort = process.env.FRONTEND_WEB_PORT;
+    const frontendMobilePort = process.env.FRONTEND_MOBILE_PORT;
+    const frontendUrlWeb = process.env.FRONTEND_URL_WEB || `http://${host}:${frontendWebPort}`;
+    const frontendUrlMobile = process.env.FRONTEND_URL_MOBILE || `http://${host}:${frontendMobilePort}`;
+    const allowedOrigins = [frontendUrlWeb, frontendUrlMobile].filter((o) => !!o);
     app.enableCors({
         origin: allowedOrigins,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
     });
-    await app.listen(3000);
-    console.log(`🚀 Server running on ${process.env.BACKEND_URL}`);
+    await app.listen(port, '0.0.0.0');
+    const backendUrl = process.env.BACKEND_URL || `http://${host}:${port}`;
+    console.log(`🚀 Server running on ${backendUrl}`);
+    console.log('🌐 CORS allowed from:', allowedOrigins);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

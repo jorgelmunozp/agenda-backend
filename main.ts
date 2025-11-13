@@ -7,31 +7,44 @@ import { LoggingInterceptor } from './src/common/interceptors/logging.intercepto
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Aplica el filtro global de excepciones (Front)
+  // Filtro global de excepciones (Frontend)
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  // Aplica el interceptor global formato de logs HALL (Back)
+  // Interceptor global formato de logs HALL (Backend)
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   // Habilitar validaciones globales
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // elimina propiedades que no están en el DTO
-      forbidNonWhitelisted: true, // lanza error si vienen propiedades extra
-      transform: true, // convierte automáticamente los tipos
+      whitelist: true,                // Elimina propiedades que no están en el DTO
+      forbidNonWhitelisted: true,     // Lanza error si vienen propiedades extra
+      transform: true,                // Convierte automáticamente los tipos
     }),
   );
 
-  // Habilita CORS para ambos frontend: Web y Mobil
-  const allowedOrigins = ['*', process.env.FRONTEND_URL_WEB, process.env.FRONTEND_URL_MOBILE].filter((o): o is string => !!o); // <- type guard: elimina undefined
+  // Configuración multiorigen para el Cors
+  const host = process.env.HOST;
+  const port = Number(process.env.PORT);
+
+  const frontendWebPort = process.env.FRONTEND_WEB_PORT;
+  const frontendMobilePort = process.env.FRONTEND_MOBILE_PORT;
+
+  const frontendUrlWeb = process.env.FRONTEND_URL_WEB || `http://${host}:${frontendWebPort}`;
+  const frontendUrlMobile = process.env.FRONTEND_URL_MOBILE || `http://${host}:${frontendMobilePort}`;
+
+  // Habilita CORS para ambos frontend: Web y Mobile
+  const allowedOrigins = [frontendUrlWeb, frontendUrlMobile].filter((o): o is string => !!o); // <- type guard: elimina undefined
 
   app.enableCors({
-    origin: allowedOrigins,         // Frontend que hará las peticiones
+    origin: allowedOrigins,             // Frontend que hará las peticiones
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,              // Recibe cookies o headers de auth
+    credentials: true,                  // Recibe cookies o headers de auth
   });
 
-  await app.listen(3000);
-  console.log(`🚀 Server running on ${process.env.BACKEND_URL}`);
+  await app.listen(port, '0.0.0.0');    // 0.0.0.0 para aceptar otras máquinas de la red
+  const backendUrl = process.env.BACKEND_URL || `http://${host}:${port}`;
+
+  console.log(`🚀 Server running on ${backendUrl}`);
+  console.log('🌐 CORS allowed from:', allowedOrigins);
 }
 bootstrap();
