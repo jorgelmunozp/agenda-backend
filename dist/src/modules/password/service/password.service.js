@@ -65,7 +65,7 @@ let PasswordService = class PasswordService {
         const collection = await this.getCollection();
         const user = await collection.findOne({ 'user.email': email });
         if (!user)
-            throw new common_1.NotFoundException(`There is no user with the email ${email}`);
+            throw new common_1.NotFoundException(`El email ${email} no está registrado`);
         const token = this.jwtService.sign({ _id: user._id }, { secret: process.env.JWT_SECRET, expiresIn: 900 });
         const baseUrl = origin === 'mobile' ? (process.env.FRONTEND_URL_PROD_MOBILE || `${process.env.HOST}:${process.env.FRONTEND_MOBILE_PORT}`) : (process.env.FRONTEND_URL_PROD_WEB || `${process.env.HOST}:${process.env.FRONTEND_WEB_PORT}`);
         const resetLink = `http://${baseUrl}/password-reset/${token}`;
@@ -95,17 +95,17 @@ let PasswordService = class PasswordService {
       `,
         });
         console.log(`Recovery email sent to ${email}:`, info.messageId);
-        return { message: `Recovery link sent to ${email}` };
+        return { message: `Link de recuperación enviado a ${email}` };
     }
     async verifyResetToken(token) {
         if (!token)
             throw new common_1.BadRequestException('Token is required');
         try {
             const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
-            return { message: 'Valid token', id: payload._id };
+            return { message: 'Token válido', id: payload._id };
         }
         catch (err) {
-            throw new common_1.BadRequestException('Invalid or expired token');
+            throw new common_1.BadRequestException('Token inválid o expirado');
         }
     }
     async updatePasswordById(id, newPassword) {
@@ -115,7 +115,7 @@ let PasswordService = class PasswordService {
             throw new common_1.NotFoundException('User not found');
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await collection.updateOne({ _id: user._id }, { $set: { 'user.password': hashedPassword } });
-        return { message: 'Password updated succesfully' };
+        return { message: 'Contraseña actualizada' };
     }
 };
 exports.PasswordService = PasswordService;

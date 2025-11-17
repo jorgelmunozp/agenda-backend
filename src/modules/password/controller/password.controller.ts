@@ -51,9 +51,9 @@ export class PasswordController {
       // Actualiza contraseña
       await this.passwordService.updatePasswordById(id, newPassword);
 
-      return { message: 'Password updated successfully' };
+      return { message: 'Contraseña actualizada' };
     } catch (error) {
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException('Token inválid o expirado');
     }
   }
 }

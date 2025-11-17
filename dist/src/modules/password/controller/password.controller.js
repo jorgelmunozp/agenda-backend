@@ -78,10 +78,10 @@ let PasswordController = class PasswordController {
             });
             const id = payload._id;
             await this.passwordService.updatePasswordById(id, newPassword);
-            return { message: 'Password updated successfully' };
+            return { message: 'Contraseña actualizada' };
         }
         catch (error) {
-            throw new common_1.UnauthorizedException('Invalid or expired token');
+            throw new common_1.UnauthorizedException('Token inválid o expirado');
         }
     }
 };
