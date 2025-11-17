@@ -53,7 +53,7 @@ export class PasswordService {
       to: email,
       subject: 'Recuperación de contraseña',
       html: `
-        <h2>OrganiceU</h2>
+        <h3 style="font-weight:900;font-style:italic;font-size:1.25rem;text-align:center;">Organize<span style="color:#107ACC;">U</span></h3>
         <h3>Hola ${user.user?.name ?? 'Usuario'},</h3>
         <p>Has solicitado restablecer tu contraseña.</p>
         <p>Haz clic en el siguiente enlace para establecer una nueva contraseña (válido por 15 minutos):</p>
