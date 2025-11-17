@@ -68,9 +68,7 @@ let PasswordService = class PasswordService {
             throw new common_1.NotFoundException(`There is no user with the email ${email}`);
         const token = this.jwtService.sign({ _id: user._id }, { secret: process.env.JWT_SECRET, expiresIn: 900 });
         const baseUrl = origin === 'mobile' ? (process.env.FRONTEND_URL_PROD_MOBILE || `${process.env.HOST}:${process.env.FRONTEND_MOBILE_PORT}`) : (process.env.FRONTEND_URL_PROD_WEB || `${process.env.HOST}:${process.env.FRONTEND_WEB_PORT}`);
-        console.log('baseUrl: ', baseUrl);
         const resetLink = `http://${baseUrl}/password-reset/${token}`;
-        console.log('resetLink: ', resetLink);
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT ?? '587'),

@@ -32,10 +32,9 @@ export class PasswordService {
 
     // Elegir baseUrl según origen
     const baseUrl = origin === 'mobile' ? (process.env.FRONTEND_URL_PROD_MOBILE || `${process.env.HOST}:${process.env.FRONTEND_MOBILE_PORT}`) : (process.env.FRONTEND_URL_PROD_WEB || `${process.env.HOST}:${process.env.FRONTEND_WEB_PORT}`);
-console.log('baseUrl: ', baseUrl);
+
     // Link de recuperación
     const resetLink = `http://${baseUrl}/password-reset/${token}`;
-console.log('resetLink: ', resetLink);
 
     // Se configura transporte de correo
     const transporter = nodemailer.createTransport({
