@@ -31,10 +31,11 @@ export class PasswordService {
     const token = this.jwtService.sign({ _id: user._id }, { secret: process.env.JWT_SECRET, expiresIn: 900 });
 
     // Elegir baseUrl según origen
-    const baseUrl = origin === 'mobile' ? process.env.FRONTEND_URL_MOBILE : process.env.FRONTEND_URL_WEB;
-
+    const baseUrl = origin === 'mobile' ? (process.env.FRONTEND_URL_PROD_MOBILE || `${process.env.HOST}:${process.env.FRONTEND_MOBILE_PORT}`) : (process.env.FRONTEND_URL_PROD_WEB || `${process.env.HOST}:${process.env.FRONTEND_WEB_PORT}`);
+console.log('baseUrl: ', baseUrl);
     // Link de recuperación
-    const resetLink = `${baseUrl}/password-reset/${token}`;
+    const resetLink = `http://${baseUrl}/password-reset/${token}`;
+console.log('resetLink: ', resetLink);
 
     // Se configura transporte de correo
     const transporter = nodemailer.createTransport({
@@ -53,10 +54,11 @@ export class PasswordService {
       to: email,
       subject: 'Recuperación de contraseña',
       html: `
-        <h2>Hola ${user.user?.name ?? 'Usuario'},</h2>
+        <h2>OrganiceU</h2>
+        <h3>Hola ${user.user?.name ?? 'Usuario'},</h3>
         <p>Has solicitado restablecer tu contraseña.</p>
         <p>Haz clic en el siguiente enlace para establecer una nueva contraseña (válido por 15 minutos):</p>
-        <a href="${resetLink}" style="background-color:#007bff;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Restablecer contraseña</a>
+        <a href="${resetLink}" style="background-color:#5c3b99;color:white;padding:10px 15px;border-radius:5px;text-decoration:none;">Restablecer contraseña</a>
         <br /><br />
         <p>Este enlace estará disponible por 15 minutos.</p>
         <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
