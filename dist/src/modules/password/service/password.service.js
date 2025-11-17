@@ -102,10 +102,10 @@ let PasswordService = class PasswordService {
             throw new common_1.BadRequestException('Token is required');
         try {
             const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
-            return { message: 'Token válido', id: payload._id };
+            return { message: 'Token válido o expirado', id: payload._id };
         }
         catch (err) {
-            throw new common_1.BadRequestException('Token inválid o expirado');
+            throw new common_1.BadRequestException('Token inválido o expirado');
         }
     }
     async updatePasswordById(id, newPassword) {

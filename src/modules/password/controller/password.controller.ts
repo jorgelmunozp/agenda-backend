@@ -38,7 +38,7 @@ export class PasswordController {
   async updatePassword(@Body() body: { token: string; newPassword: string }) {
     const { token, newPassword } = body;
     if (!token || !newPassword) {
-      throw new BadRequestException('Token and new password are required');
+      throw new BadRequestException('Ingresa la nueva contraseña');
     }
 
     try {
@@ -53,7 +53,7 @@ export class PasswordController {
 
       return { message: 'Contraseña actualizada' };
     } catch (error) {
-      throw new UnauthorizedException('Token inválid o expirado');
+      throw new UnauthorizedException('Token inválido o expirado');
     }
   }
 }

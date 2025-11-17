@@ -74,9 +74,9 @@ export class PasswordService {
 
     try {
       const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
-      return { message: 'Token válido', id: payload._id };
+      return { message: 'Token válido o expirado', id: payload._id };
     } catch (err) {
-      throw new BadRequestException('Token inválid o expirado');
+      throw new BadRequestException('Token inválido o expirado');
     }
   }
 

@@ -70,7 +70,7 @@ let PasswordController = class PasswordController {
     async updatePassword(body) {
         const { token, newPassword } = body;
         if (!token || !newPassword) {
-            throw new common_1.BadRequestException('Token and new password are required');
+            throw new common_1.BadRequestException('Ingresa la nueva contraseña');
         }
         try {
             const payload = this.jwtService.verify(token, {
@@ -81,7 +81,7 @@ let PasswordController = class PasswordController {
             return { message: 'Contraseña actualizada' };
         }
         catch (error) {
-            throw new common_1.UnauthorizedException('Token inválid o expirado');
+            throw new common_1.UnauthorizedException('Token inválido o expirado');
         }
     }
 };
